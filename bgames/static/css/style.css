@@ -1,0 +1,113 @@
+html {
+    height: 100%;
+}
+BODY { font: 10pt Arial, Helvetica, sans-serif; background: linear-gradient(to left, #F4ECE9, #ecfcfe);
+	height: 100%;
+}
+#catalog DIV {
+    position:relative;
+    width: 205px; /* Ширина */
+    margin: 1% 1% 1% 1%; /* Отступы */
+    text-align: center; /* Выравнивание по центру */
+    display: inline-block; /* Строчно-блочный элемент */
+    vertical-align: top; /* Выравнивание по верхнему краю */
+}
+#catalog P { margin: 0 5px; }
+#catalog SPAN { font-size: 0.9em; }
+.color0 {
+    background-color: #99C5C8;
+}
+.color1 {
+    background-color: #E2EADF;
+}
+.color2 {
+    background-color: #C0D5D0;
+}
+.color3 {
+    background-color: white;
+}
+.color4 {
+    background-color: #fffcfb;
+}
+.color7 {
+    background-color: #eeb9a7;
+}
+.color5 {
+    background-color: #b7c89b;
+}
+.img1 {
+    max-width: 130px;
+}
+.img2 {
+    max-width: 250px;
+    height: auto;
+}
+.box_shadow {
+    box-shadow: 0 0 40px rgba(0, 0, 0, .1) inset; 
+}
+.box-shadow2 {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+}
+.mg {
+    margin-left:20px;
+}
+.mg2 {
+    margin-left:1px;
+    margin-right:1px;
+} 
+.flex {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 40px;
+}
+.flex1 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#square {
+    width: 40px;
+    height: 30px;
+    background: #ffe481;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+}
+.layer1 {
+    display: inline-block;
+    position: relative
+}
+.layer2 {
+    position: absolute; top:0;right:0;
+}
+.bold_font {
+    font-weight: bold; 
+} 
+TD.leftcol {
+max-width: 100%;
+/*width: 300px;  Ширина левой колонки с рисунком */
+vertical-align: center; /* Выравнивание по верхнему краю */
+}
+.corner {
+    margin: 15px 15px 15px 15px;
+}
+input[type=checkbox]
+{
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(1.1); /* IE */
+  -moz-transform: scale(1.1); /* FF */
+  -webkit-transform: scale(1.1); /* Safari and Chrome */
+  -o-transform: scale(1.1); /* Opera */
+  transform: scale(1.1);
+  padding: 10px;
+}
+.scroll-section {
+    max-height: 200px;
+    overflow-y: scroll;
+  }
+
+.font_cust {
+    font-size: 12pt;
+}
+

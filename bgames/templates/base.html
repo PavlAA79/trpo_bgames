@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <link rel="stylesheet"  type="text/css" href="{% static 'css/style.css'%}">
+    {% block title %}
+    {% endblock %}
+
+</head>
+<body >
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+<nav class="navbar navbar-expand-lg navbar-light color0 box_shadow">
+  <div class="container-fluid">
+    <a class="navbar-brand mg" href="{% url 'index' %}"><i class="fa fa-leaf" aria-hidden="true"></i>
+      Настольные игры: Главная</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Переключатель навигации">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    <div class="collapse navbar-collapse" id="navbarToggler">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link font_cust" aria-current="page" href="{% url 'search' %}">Поиск</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ms-auto">
+        {% if user.is_authenticated and user.is_superuser == True %}
+        <li class="nav-item">
+          <a class="nav-link font_cust" href="/admin">Администрирование</a>
+        </li>
+        {% endif %}
+        {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link font_cust" aria-current="page" href="{% url 'personal' %}">Профиль | {{user.username}}</a>
+        </li>
+        {% endif %}
+          {% if user.is_authenticated %}
+                 <p></p>
+                  {% else %}
+                  <span class="navbar-text font_cust">Вы не авторизованы</span> 
+          {% endif %}
+          <li class="nav-item">
+            {% if user.is_authenticated %}
+            <p></p>
+            {% else %}
+              <a class="nav-link font_cust" href="{% url 'login' %}">Войти</a>
+            {% endif %}
+          </li>
+          <li class="nav-item">
+              {% if user.is_authenticated %}
+              <a class="nav-link font_cust" href="{% url 'logout' %}">Выйти</a>
+              {% else %}
+              <a class="nav-link font_cust" href="{% url 'signup' %}">Регистрация</a>
+              {% endif %}
+          </li>
+    </ul>
+    </div>
+  </div>
+</nav>
+    {% block content %}{% endblock %}
+
+<footer style="padding: 10px 20px;" class ="color2">
+       <h6 align = "left">С вопросами обращайтесь по адресу admin@admin.com</h6>
+</footer>
+</body>
+</html>

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}
+<title>
+    {{one_bgdata.1}}
+</title>
+
+{% endblock %}
+{% block content %}
+
+<div class="container box-shadow2 mt-3">
+  <div class="row color2">
+    <div class="col-md-auto">
+      <h4 style ="height: 40px;"><p>{{one_bgdata.1}}</p></h4>
+    </div>
+  </div>
+  <div class="row color4">
+    <div class="col-md-auto">
+      <h5 >{{one_bgdata.2}}</h5>
+      <p><img src="{{one_bgdata.11}}" class ="box_shadow2" alt="{{one_bgdata.1}}" align="left" 
+       vspace="10" hspace="10"style="max-width: 200px;"><p> </p>
+      <p>{{one_bgdata.12}}</p>
+      </p>
+    </div>
+  </div>
+  <div class="row color1" style="min-height:80px;">
+    <div class="col-md-auto" style="margin-top: 2%; margin-bottom: 2%;">
+      <h4 >Рейтинг: {{one_bgdata.7}}</h4>
+    </div>
+    <div class="col-md-auto" style="margin-top: 1%; margin-bottom: 2%;">
+        <button type="button" class="btn  btn-lg color0" align="center">
+        <a href="https://boardgamegeek.com/{{one_bgdata.15}}" style="color: black;  text-decoration: none;"><h5>Купить</h5></a>
+        </button>
+    </div>
+    <div class="col-md-auto" style="margin-top: 1%;margin-bottom: 2%;">
+        {% if user.is_authenticated %} 
+        <form method='post' action="{% url 'fav_game' one_bgdata.0 %}">
+          {% csrf_token %}
+          <input type='hidden' name='favoured' value={{one_bgdata.0}}>
+          {% if b == False  %}
+          <button type='submit' class = "btn btn-lg" style =" background-color:#c2d4a5">
+              В избранное
+          </button>
+          {% else %}
+          <button type='submit' class = "btn btn-lg" style ="  background-color: #eeb9a7">
+              Убрать из избранного
+          </button>
+          {% endif %}
+        </form>
+        {% endif %}
+    </div>
+  </div>
+</div>
+
+    <div class="container box-shadow2">
+      <div class="row color2">
+        <div class="col-md-auto">
+            <h6 align="center" class ="mt-1"><b>Возрастное ограничение</b></h6> 
+            <h6 align="center">{{one_bgdata.5}}+</h6> 
+    
+        </div>
+        <div class="col-md-auto">
+            <h6 align="center" class ="mt-1"><b>Количество игроков</b></h6> 
+            <h6 align="center">
+                {% if one_bgdata.3 == one_bgdata.4 %}
+                {{one_bgdata.3}}
+                {% else %}
+                от {{one_bgdata.3}} до {{one_bgdata.4}} 
+                {% endif %}
+            </h6> 
+
+        </div>
+        <div class="col-md-auto " >
+            <h6 align="center" class ="mt-1"><b>Время партии</b></h6> 
+            <h6 align="center">
+                {% if one_bgdata.13 == one_bgdata.14 %}
+                {{one_bgdata.13}} мин
+                {% else %}
+                {{one_bgdata.13}} - {{one_bgdata.14}} мин 
+                {% endif %}   
+                </h6> 
+        </div>
+        <div class="col-md-4">
+            <h6 align="center" class ="mt-1"><b>Механики</b></h6> 
+            <h6 align="center"> {{one_bgdata.8}} </h6> 
+        </div>
+        <div class="col-md-2 " >
+            <h6 align="center" class ="mt-1"><b>Жанры</b></h6> 
+            <h6 align="center"> {{one_bgdata.9}} </h6> 
+        </div>
+      </div>
+    </div>
+
+
+<div class = "container">
+<p> </p>    
+</div>
+<div class = "container">
+
+    {% if user.is_authenticated %}
+    <p> </p>
+    <form method='post' action="{% url 'rate_game' one_bgdata.0 %}">
+        {% csrf_token %}
+        <table>
+        <tr>
+            <td>
+                <h5 style="margin-left:10px"> {% if rate %}Ваша оценка: {{rate}}{% else %}Вы еще не оценивали эту игру{% endif %}</h5>  
+            </td>
+            <td>
+                <select name='rates' id="rates" class="form-select" style ="width: 192px; margin-left:10px;">
+                    <option value="1" selected>1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>  
+            </td>
+            <td>
+                <button type='submit' class = "btn color0 btn-lg" style="margin-left:10px">
+                Оценить
+                </button>
+            </td>
+            </tr>
+        </table> 
+    </form>
+    {% endif %}
+    <p> </p>    
+    </div>
+    
+
+{% endblock %}

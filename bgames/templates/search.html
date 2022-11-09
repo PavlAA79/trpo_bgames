@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}
+<title>
+    Каталог
+</title>
+{% endblock %}
+{% block content %}
+<h3 align = "center" style = "margin-top: 20px;"> Поиск </h3>
+<div class = "container">
+    <form action="{% url 'search' %}" class="row" method="get">
+        <div class="form-group col-md-col-12">
+            <label for="search"><h6>Название</h6></label>
+            <input name="search" class="form-control" id="search">
+        </div>
+        <div class="row mt-2">         
+            <div class="form-group col-md-auto">
+                <label for="players"><h6>Количество игроков</h6></label>
+                <input name="players" type="text" class="form-control" id="players">
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-auto">
+                <button type="submit" class="btn color0 btn-lg mt-2">Найти</button>
+            </div>
+            <div class="form-group col-md-auto">
+                <button type="reset" class="btn color0 btn-lg mt-2">Сброс</button>
+            </div>
+        </div>
+        </div>
+    </form>
+</div>
+
+
+<h3 align = "center" style = "margin-top: 20px;"> Результаты поиска</h3>
+<div class = "container corner">
+    <h5 class ="corner">
+    {% with results|length as total_results %}
+    Найдено  результатов: {{ total_results }}
+    {% endwith %}
+    </h5>   
+</div>
+<p> </p>
+    <div id="catalog" style ="margin-left : 0.7%">
+    {% for game in results %}
+        <div class = "color1 box-shadow2">
+            <a href="/detail/{{game.0}}" style="color: #154e45;">
+            <h6 class ="color2 flex bold_font">{{game.1}}</h6>
+            </a>
+            <span class="layer1">
+                <a href="/detail/{{game.0}}"><img src={{game.10}} class = "box-shadow2" alt=""></a>
+            <span id="square" class = "flex1 layer2" style = "font-size: 17px">{{game.7}}</span>
+            </span>
+            <p>Количество игроков: от {{game.3}} до {{game.4}} </p> 
+            <p>{{game.5}}+</p> 
+        </div>       
+    {% endfor %}                       
+    </div>
+<div class = "container" style="padding-bottom:145px;"> 
+</div>
+{% endblock %}

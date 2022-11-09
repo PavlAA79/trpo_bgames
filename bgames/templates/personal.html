@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}
+<title>
+    Персональная страница
+</title>
+{% endblock %}
+{% block content %}
+<div class="container box-shadow2 mt-3">
+    <div class="row color2" style ="min-height: 50px">
+        <div class="col-md-auto">
+            <h4 style="margin-top: 2%; margin-bottom: 2%;">  Никнейм:  {{userdata.username}} </h4>   
+        </div>
+    </div>
+    <div class="row color4">
+        <div class="col-md-auto">
+            <h6 style="margin-top: 2%; margin-bottom: 2%;"> Был(а) в сети: {{userdata.last_login}} </h6>
+        </div>
+    </div>
+    {% if userdata.first_name %}
+    <div class="row color4">
+        <div class="col-md-auto">
+            <h6 style="margin-top: 2%; margin-bottom: 2%;"> Имя: {{userdata.first_name}} </h6>
+        </div>
+    </div>
+    {% endif %}
+    {% if userdata.last_name %}
+    <div class="row color4">
+        <div class="col-md-auto">
+            <h6 style="margin-top: 2%; margin-bottom: 2%;"> Фамилия: {{userdata.last_name}} </h6>
+        </div>
+    </div>
+    {% endif %}
+    {% if userdata.email %}
+    <div class="row color4">
+        <div class="col-md-auto">
+            <h6 style="margin-top: 2%; margin-bottom: 2%;"> Электронная почта (email): {{userdata.email}} </h6>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<h5 style ="margin-left : 2%;margin-top: 1%">
+    Избранное ({% if fav != 'None'%}{{fav|length}}{% else %} 0 {% endif %}):
+</h5>
+    {% if fav != 'None'%}
+    <div id="catalog" style ="margin-left : 0.7%">
+        {% for game in fav %}
+        <div class = "color1 box-shadow2">
+            <a href="/detail/{{game.0}}" style="color: #154e45;">
+            <h6 class ="color2 flex bold_font">{{game.1}}</h6>
+                </a>
+                <span class="layer1">
+                    <a href="/detail/{{game.0}}"><img src={{game.6}} class = "box-shadow2 img1"></a>
+                <span id="square" class = "flex1 layer2" style = "font-size: 17px">{{game.5}}</span>
+                </span>
+            <p>Количество игроков: от {{game.2}} до {{game.3}} </p> 
+            <p>{{game.4}}+</p> 
+        </div>       
+        {% endfor %}                       
+    </div>
+    {% endif %}
+<div class = "container" style="padding-bottom:104px;"> 
+</div>
+{% endblock %}
