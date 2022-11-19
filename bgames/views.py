@@ -60,7 +60,7 @@ def AddUpdRate(request,id):
         selected_option = float(request.POST['rates'])
         if selected_option:
             if rate:
-                Boardgame.updateBgameRateUpd(current_user.id,id,selected_option)
+                Boardgame.updateBgameRateUpd(current_user.id,id,rate,selected_option)
                 Rate.updateRate(current_user.id,id,selected_option)
             else:
                 Rate.addRate(current_user.id,id,selected_option)
