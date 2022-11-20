@@ -2,9 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 import random
 import  psycopg2
-from psycopg2 import sql
-from itertools import chain
-
 
 # Функция для генерации ключа
 def generate_id(ids):
@@ -18,16 +15,60 @@ def generate_id(ids):
 
 #Table Module класс Настольная игра
 class Boardgame(models.Model):
-    def getAllBgames(): 
-        return BgameFinder.getAllBgames() 
-    def filterBgames(name,players):
-        return BgameFinder.filterBgames(name,players)
-    def getBgame(game_id):
-        bgame = BgameFinder.findBgame(game_id)
-        bgame_data = bgame.getBgame()
-        return bgame_data
-    def updateBgameRateAdd(game_id,rating):
-        bgame_old = BgameFinder.findBgame(game_id)
+    bgames_table = []
+    def __init__(self):
+        self.bgames_table = BgameFinder.getAllBgames()
+    def __str__(self):
+        st = ''
+        for i in range(len(self.bgames_table)):
+            st = st + str(self.bgames_table[i])
+        return st
+    def findBgame(self,game_id):
+        bgames = self.bgames_table
+        for bg in bgames:
+            if bg.getGameId() == game_id:
+                found_bgame = bg
+        return found_bgame
+    def getAllBgames(self):
+        bgames = BgameFinder.getAllBgames()
+        bgames_list = []
+        for bg in bgames:
+            bgames_list.append(bg.getBgame())
+        bgames_list.sort(key=lambda b: b[1])
+        return bgames_list
+    def filterBgames(self,name,players):
+        if players != '':
+            players = int(players)
+        bgames = self.bgames_table
+        result = []
+        if name != '' and players != '':
+            for bg in bgames:
+                if (name in bg.getName()) and (bg.getMinPlayers()<=players and bg.getMaxPlayers()>=players):
+                    result.append(bg.getBgame())
+        if name != '' and players == '':
+            for bg in bgames:
+                if (name in bg.getName()):
+                    result.append(bg.getBgame())
+        if name == '' and players != '':
+            for bg in bgames:
+                if (bg.getMinPlayers()<=players and bg.getMaxPlayers()>=players):
+                    result.append(bg.getBgame())
+        result.sort(key=lambda r: r[1])
+        return result
+    def getBgame(self,game_id):
+        bg = self.findBgame(game_id)
+        found_bgame = bg.getBgame()
+        return found_bgame
+    def getUserFavGames(self,fav_list):
+        bg_table = self.bgames_table
+        user_fav = []
+        for bg in bg_table:
+            if bg.getGameId() in fav_list:
+                user_fav.append(bg.getBgame())
+        user_fav.sort(key=lambda u: u[1])
+        return user_fav
+    def updateBgameRateAdd(self,game_id,rating):
+        bgame_old = self.findBgame(game_id)
         k = bgame_old.getUsersRated()
         a = bgame_old.getAveRate()
         new_users_rated = k + 1  
@@ -36,8 +77,8 @@ class Boardgame(models.Model):
         bgame_old.setUsersRated(new_users_rated)
         bgame_old.update()
         return 0
-    def updateBgameRateUpd(user_id,game_id,old_rate,rating):
-        bgame_old = BgameFinder.findBgame(game_id)
+    def updateBgameRateUpd(self,game_id,old_rate,rating):
+        bgame_old = self.findBgame(game_id)
         a = bgame_old.getAveRate()
         k = bgame_old.getUsersRated()
         new_average_rate = round((a*k - old_rate + rating)/k,1)
@@ -79,7 +120,6 @@ class BoardgameGateway:
         self.minplaytime = a[13]
         self.maxplaytime = a[14]
         self.URL = a[15]
-
     def __str__(self):
         return f"{self.game_id} {self.game_name}"
     def getBgame(self):
@@ -88,6 +128,14 @@ class BoardgameGateway:
         self.thumbnail, self.image, self.description, self.minplaytime,
         self.maxplaytime, self.URL]
         return bgame
+    def getName(self):
+        return self.game_name
+    def getMinPlayers(self):
+        return self.minplayers
+    def getMaxPlayers(self):
+        return self.maxplayers
+    def getGameId(self):
+        return self.game_id
     def getUsersRated(self):
         return self.users_rated
     def setUsersRated(self,users_rated):
@@ -110,62 +158,56 @@ class BoardgameGateway:
         return 0
 #Raw Data Gateway класс для проведения поиска BgameFinder
 class BgameFinder:
-    def findBgame(game_id):
-        conn = psycopg2.connect( host='localhost', user='postgres', password='123', dbname='Board_gamesDB')
-        cursor = conn.cursor() 
-        id = str(game_id)
-        sqlString = 'SELECT * FROM "Board_game" WHERE game_id='+ id
-        cursor.execute(sqlString)
-        bgame_data = cursor.fetchall() 
-        cursor.close() 
-        conn.close() 
-        bg = list(bgame_data[0])
-        bgame = BoardgameGateway(bg)
-        return bgame
     def getAllBgames():
         conn = psycopg2.connect( host='localhost', user='postgres', password='123', dbname='Board_gamesDB')
         cursor = conn.cursor() 
         cursor.execute('SELECT * FROM "Board_game"')
-        bgames = cursor.fetchall() 
+        bgames = cursor.fetchall()
+        bgames_list = []
+        for bg in bgames:
+            bgames_list.append(BoardgameGateway(list(bg)))
         cursor.close() 
         conn.close() 
-        return bgames
-    def filterBgames(name,players):
-        sqlString = 'SELECT * FROM "Board_game"'
-        if name!='' and players =='':
-            s = "'%"+name+"%'" 
-            sqlString = 'SELECT * FROM "Board_game" WHERE game_name LIKE '+ str(s)
-        if name =='' and players !='':
-            s = players 
-            sqlString = 'SELECT * FROM "Board_game" WHERE minplayers<='+str(s)+' AND maxplayers>='+str(s)
-        if name !='' and players !='':
-            i = "'%"+name+"%'" 
-            s = players 
-            sqlString = 'SELECT * FROM "Board_game" WHERE minplayers<='+str(s)+' AND maxplayers>='+str(s)+'AND game_name LIKE '+ str(i)
-        conn = psycopg2.connect( host='localhost', user='postgres', password='123', dbname='Board_gamesDB')
-        cursor = conn.cursor() 
-        cursor.execute(sqlString)
-        bgames = cursor.fetchall() 
-        cursor.close() 
-        conn.close() 
-        return bgames
+        return bgames_list
+
 
 #Table Module класс Оценка
 class Rate(models.Model):
-    def getUserGameRate(user_id,game_id):
-        review = RateFinder.findReview(user_id,game_id)
+    rate_table = []
+    def __init__(self):
+        self.rate_table = RateFinder.getAllRates()
+    def findFreeRateId(self):
+        rates = self.rate_table
+        review_ids = []
+        for review in rates:
+            review_ids.append(review.getReviewId())
+        review_id = generate_id(review_ids)
+        return review_id
+    def findReview(self,user_id,game_id):
+        rates = self.rate_table
+        success = False
+        for review in rates:
+            if (review.getUserId() == user_id) and (review.getGameId() == game_id):
+                user_review = review
+                success = True
+        if success == False:
+            user_review = ''
+        return user_review
+    def getUserGameRate(self,user_id,game_id):
+        review = self.findReview(user_id,game_id)
         if review != '':
             rate = review.getRating()
         else:
             rate = ''
         return rate
-    def addRate(user_id,game_id,rating):
-        review_id = RateFinder.findFreeRateId()
-        rate = RateGateway(review_id,user_id,game_id,rating)
+    def addRate(self,user_id,game_id,rating):
+        review_id = self.findFreeRateId()
+        review = [review_id,user_id,game_id,rating]
+        rate = RateGateway(review)
         rate.insert()
         return 0
-    def updateRate(user_id, game_id, rating):
-        review = RateFinder.findReview(user_id,game_id)
+    def updateRate(self,user_id, game_id, rating):
+        review = self.findReview(user_id,game_id)
         review.setRating(rating)
         review.update()
         return 0
@@ -176,17 +218,23 @@ class RateGateway():
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name ="user")
     game = models.ForeignKey(Boardgame, on_delete=models.CASCADE, related_name ="game")
     rating = models.FloatField()
-    def __init__(self,a,b,c,d):
-        self.review_id = a
-        self.user = b
-        self.game = c
-        self.rating = d 
+    def __init__(self,a):
+        self.review_id = a[0]
+        self.user = a[1]
+        self.game = a[2]
+        self.rating = a[3]
     def __str__(self):
         return f"{self.review_id} {self.user} {self.game} {self.rating}"
     def getRating(self):
         return self.rating
     def setRating(self,rating):
         self.rating = rating
+    def getUserId(self):
+        return self.user
+    def getGameId(self):
+        return self.game
+    def getReviewId(self):
+        return self.review_id
     def insert(self):
         re = str(self.review_id)
         u = str(self.user)
@@ -213,51 +261,50 @@ class RateGateway():
         return 0
 #Raw Data Gateway класс для проведения поиска RateFinder
 class RateFinder():
-    def findFreeRateId():
+    def getAllRates():
         conn = psycopg2.connect( host='localhost', user='postgres', password='123', dbname='Board_gamesDB')
         cursor = conn.cursor() 
-        sqlString = 'SELECT review_id FROM "Rate"'
-        cursor.execute(sqlString)
-        rated = cursor.fetchall()
-        rates = list(chain.from_iterable(rated))
+        cursor.execute('SELECT * FROM "Rate"')
+        rates = cursor.fetchall()
+        rates_list = []
+        for rate in rates:
+            rates_list.append(RateGateway(list(rate)))
         cursor.close() 
         conn.close() 
-        review_id  = generate_id(rates)
-        return review_id
-    def findReview(user_id,game_id):
-        conn = psycopg2.connect( host='localhost', user='postgres', password='123', dbname='Board_gamesDB')
-        cursor = conn.cursor()
-        if user_id:
-            u = str(user_id)
-            g = str(game_id)
-            sqlString = 'SELECT "Rate".* FROM "Rate" JOIN "auth_user" ON "Rate".user_id ="auth_user".id JOIN "Board_game" ON "Rate".game_id = "Board_game".game_id WHERE "Rate".user_id ='+u+' AND "Rate".game_id='+g
-            cursor.execute(sqlString)
-            rated = cursor.fetchall()
-            if rated:
-                rate = list(rated[0])
-                review = RateGateway(rate[0],rate[1],rate[2],rate[3])
-            else:
-                review = ''
-        else:
-            review = ''
-        cursor.close() 
-        conn.close()
-        return review
+        return rates_list 
+
    
 #Table Module класс Избранное
 class Favoured(models.Model):
-    def getUserFavoured(user_id):
-        return FavouredFinder.getUserFavoured(user_id)
-    def addFavBgame(user_id, game_id):
-        fav_id = FavouredFinder.findFreeFavId()
-        new_fav = FavouredGateway(fav_id,user_id, game_id)
+    fav_table = []
+    def __init__(self):
+        self.fav_table = FavouredFinder.getAllFavRecords()
+    def findFreeFavId(self):
+        fav_tab = self.fav_table
+        fav = []
+        for f in fav_tab:
+            fav.append(f.getFavId())
+        fav_id = generate_id(fav)
+        return fav_id
+    def addFavBgame(self,user_id, game_id):
+        fav_id = self.findFreeFavId()
+        fav_record = [fav_id,user_id, game_id]
+        new_fav = FavouredGateway(fav_record)
         new_fav.insert()
         return 0
-    def getFavGameIds(user_id):
-        return FavouredFinder.getFavGameIds(user_id)
-    def deleteFromFav(user_id,game_id):
-        fav = FavouredFinder.findFavouredRecord(user_id,game_id)
-        fav.delete()
+    def getFavGameIds(self,user_id):  
+        fav = self.fav_table
+        fav_list = []
+        for f in fav:
+            if f.getUserId() == user_id:
+                fav_list.append(f.getFavGameId())
+        return fav_list  
+    def deleteFromFav(self,user_id,game_id):
+        fav_tab = self.fav_table
+        for f in fav_tab:
+            if (f.getFavGameId() == game_id) and (f.getUserId()==user_id):
+                fav_del = f
+        fav_del.delete()
         return 0
 
 #Raw Data Gateway Шлюз записи данных для таблицы Favoured
@@ -265,12 +312,18 @@ class FavouredGateway():
     fav_id = models.IntegerField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name ="user")
     game = models.ForeignKey(Boardgame, on_delete=models.CASCADE, related_name ="game")
-    def __init__(self, a,b,c):
-        self.fav_id = a
-        self.user = b
-        self.game = c
+    def __init__(self, a):
+        self.fav_id = a[0]
+        self.user = a[1]
+        self.game = a[2]           
     def __str__(self):
         return f"{self.fav_id} {self.user} {self.game}"
+    def getFavGameId(self):
+        return self.game
+    def getUserId(self):
+        return self.user
+    def getFavId(self):
+        return self.fav_id
     def insert(self):
         f = str(self.fav_id)
         u = str(self.user)
@@ -296,51 +349,14 @@ class FavouredGateway():
 
 #Raw Data Gateway  класс для проведения поиска FavouredFinder
 class FavouredFinder():
-    def getUserFavoured(user_id):
+    def getAllFavRecords():
         conn = psycopg2.connect( host='localhost', user='postgres', password='123', dbname='Board_gamesDB')
         cursor = conn.cursor() 
-        u = str(user_id)
-        sqlString = 'SELECT "Board_game".game_id,"Board_game".game_name, "Board_game".minplayers,"Board_game".maxplayers, "Board_game".minage,"Board_game".average_rate,"Board_game".thumbnail FROM "Favoured" JOIN "auth_user" ON "Favoured".user_id ="auth_user".id JOIN "Board_game" ON "Favoured".game_id = "Board_game".game_id WHERE "auth_user".id ='+u
-        cursor.execute(sqlString)
-        favoured = cursor.fetchall()
+        cursor.execute('SELECT * FROM "Favoured"')
+        fav = cursor.fetchall()
+        fav_list = []
+        for f in fav:
+            fav_list.append(FavouredGateway(list(f)))
         cursor.close() 
         conn.close() 
-        return favoured
-    def getFavGameIds(user_id):
-        conn = psycopg2.connect( host='localhost', user='postgres', password='123', dbname='Board_gamesDB')
-        cursor = conn.cursor()
-        if user_id:
-            u = str(user_id)
-            sqlString = 'SELECT "Favoured".game_id FROM "Favoured" JOIN "auth_user" ON "Favoured".user_id ="auth_user".id JOIN "Board_game" ON "Favoured".game_id = "Board_game".game_id WHERE "Favoured".user_id ='+u
-            cursor.execute(sqlString)
-            favoured = cursor.fetchall()
-            fav = list(chain.from_iterable(favoured))
-            cursor.close() 
-            conn.close()
-        else:
-            fav = ''
-        return fav
-    def findFreeFavId():
-        conn = psycopg2.connect( host='localhost', user='postgres', password='123', dbname='Board_gamesDB')
-        cursor = conn.cursor() 
-        sqlString = 'SELECT fav_id FROM "Favoured"'
-        cursor.execute(sqlString)
-        favoured = cursor.fetchall()
-        fav = list(chain.from_iterable(favoured))
-        cursor.close() 
-        conn.close() 
-        fav_id  = generate_id(fav)
-        return fav_id
-    def findFavouredRecord(user_id,game_id):
-        conn = psycopg2.connect( host='localhost', user='postgres', password='123', dbname='Board_gamesDB')
-        cursor = conn.cursor() 
-        u = str(user_id)
-        g = str(game_id)
-        sqlString = 'SELECT * FROM "Favoured" JOIN "auth_user" ON "Favoured".user_id ="auth_user".id JOIN "Board_game" ON "Favoured".game_id = "Board_game".game_id WHERE "Favoured".user_id ='+u+' AND "Favoured".game_id='+g
-        cursor.execute(sqlString)
-        favoured = cursor.fetchall() 
-        fav = list(favoured[0])
-        fav_record = FavouredGateway(fav[0],fav[1],fav[2])
-        cursor.close() 
-        conn.close()
-        return fav_record
+        return fav_list    

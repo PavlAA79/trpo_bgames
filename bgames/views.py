@@ -7,7 +7,8 @@ from django.views import generic
 
 
 def BgamesList(request): 
-    bgames = Boardgame.getAllBgames() 
+    bgames_table = Boardgame()
+    bgames = bgames_table.getAllBgames() 
     return render(request,'index.html',{'bgdata':bgames})
 
 
@@ -16,9 +17,10 @@ def Search(request):
     if request.method == "GET":
         name = request.GET.get('search')
         players = request.GET.get('players')
+        b = Boardgame()
         if players !=None:
             if players.isdigit() or players =='':
-                results = Boardgame.filterBgames(name,players)
+                results = b.filterBgames(name,players)
             else:
                 results = ''
     return render(request, 'search.html', {'results': results})
@@ -26,8 +28,10 @@ def Search(request):
 
 def Detail(request, id):
     current_user = request.user
-    result = Boardgame.getBgame(id)
-    fav = Favoured.getFavGameIds(current_user.id)
+    b = Boardgame()
+    result = b.getBgame(id)
+    f = Favoured()
+    fav = f.getFavGameIds(current_user.id)
     if fav:
         if id in fav:
             b = True
@@ -35,36 +39,43 @@ def Detail(request, id):
             b = False
     else:
         b = False
-    rate = Rate.getUserGameRate(current_user.id,id)
+    r = Rate()
+    rate = r.getUserGameRate(current_user.id,id)
     return render(request, 'detail.html',{'one_bgdata':result, 'b':b,'rate':rate})
 
 def ShowFavoured(request):
     current_user = request.user
-    favoured = Favoured.getUserFavoured(current_user.id)
+    f = Favoured()
+    b = Boardgame()
+    fav_list = f.getFavGameIds(current_user.id)
+    favoured = b.getUserFavGames(fav_list)
     return render(request, 'personal.html', {'fav': favoured,'userdata':current_user})
 
 def AddDelFavoured(request,id):
     current_user = request.user
-    fav_list = Favoured.getFavGameIds(current_user.id)
+    f = Favoured()
+    fav_list = f.getFavGameIds(current_user.id)
     if request.method == 'POST':
         if id in fav_list:
-            Favoured.deleteFromFav(current_user.id,id)
+            f.deleteFromFav(current_user.id,id)
         else:
-            Favoured.addFavBgame(current_user.id,id)
+            f.addFavBgame(current_user.id,id)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 def AddUpdRate(request,id):
     current_user = request.user
-    rate = Rate.getUserGameRate(current_user.id,id)
+    r = Rate()
+    rate = r.getUserGameRate(current_user.id,id)
+    b = Boardgame()
     if request.method == 'POST':
         selected_option = float(request.POST['rates'])
         if selected_option:
             if rate:
-                Boardgame.updateBgameRateUpd(current_user.id,id,rate,selected_option)
-                Rate.updateRate(current_user.id,id,selected_option)
+                b.updateBgameRateUpd(id,rate,selected_option)
+                r.updateRate(current_user.id,id,selected_option)
             else:
-                Rate.addRate(current_user.id,id,selected_option)
-                Boardgame.updateBgameRateAdd(id,selected_option)
+                r.addRate(current_user.id,id,selected_option)
+                b.updateBgameRateAdd(id,selected_option)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
