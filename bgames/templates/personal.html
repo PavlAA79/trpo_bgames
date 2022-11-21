@@ -52,10 +52,10 @@
                 </a>
                 <span class="layer1">
                     <a href="/detail/{{game.0}}"><img src={{game.10}} class = "box-shadow2 img1"></a>
-                <span id="square" class = "flex1 layer2" style = "font-size: 17px">{{game.5}}</span>
+                <span id="square" class = "flex1 layer2" style = "font-size: 17px">{{game.7}}</span>
                 </span>
-            <p>Количество игроков: от {{game.2}} до {{game.3}} </p> 
-            <p>{{game.4}}+</p> 
+            <p>Количество игроков: {% if game.3 == game.4 %} {{game.3}} {% else %}от {{game.3}} до {{game.4}}{% endif %}</p> 
+            <p>{{game.5}}+</p> 
         </div>       
         {% endfor %}                       
     </div>
